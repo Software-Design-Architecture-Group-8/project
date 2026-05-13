@@ -6,7 +6,7 @@
 
 ---
 
-## Activity Summary
+## Activity Summary 1
 * **Effort:** 4 hours
 * **Activity:** Evaluation of Software Module Dependencies (Static Analysis)
 
@@ -21,3 +21,19 @@
 * Co-authored the **Software Design - Dependencies** section.
 * Responsible for the "Static Dependency Results" subsection, focusing on the identification and justification of files with the most and least dependencies (In-degree/Out-degree analysis).
 
+---
+
+
+
+## Activity Summary 2
+* **Effort:** 4 hours
+* **Activity:** Evaluating co-change metrics and knowledge dependencies.
+* **Reporting Period:** Week 2 (May 2026)
+
+### Tasks Performed:
+* Teamed up with **Shayan** to process the Git commit history of Prettier (`src/` directory) source to identify file couplings.
+
+### Contribution to the Main Report:
+* Drafted the methodology and findings for **Section 2: Knowledge Dependencies** within the Software Design Report.
+
+---
