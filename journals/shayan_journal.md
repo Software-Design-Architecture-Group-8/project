@@ -5,7 +5,7 @@
 
 ---
 
-## Activity Summary
+## Activity Summary 1
 * **Effort:** 4 hours
 * **Activity:** Cooperating in the static code dependency analysis.
 
@@ -16,6 +16,22 @@
 * Conducted a detailed investigation into files with the highest Out-degree (e.g., language dispatchers) and In-degree (e.g., `ast-path.js`) to understand their design rationale.
 
 ### Contribution to the Main Report:
-* Contributed to the **Software Design Report - Section 1: Dependencies**.
+* Contributed to the **Software Design Report - Section 1:Code Dependencies**.
+
+---
+
+* **Reporting Period:** Week 2 (May 2026)
+
+---
+
+## Activity Summary 2
+* **Effort:** 4 hours
+* **Activity:** Cooperating in the knowledge dependency analysis.
+
+### Tasks Performed:
+* Collaborated with **Negar** to analyze the knowledge dependencies in the Prettier source code (`src/` directory).
+
+### Contribution to the Main Report:
+* Contributed to the **Software Design Report - Section 2:Knowledge Dependencies**.
 
 ---
