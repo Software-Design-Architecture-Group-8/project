@@ -41,3 +41,33 @@
 |     [markdownlivepreview](https://markdownlivepreview.com/)     |
 |             [AST Explorer](https://astexplorer.net)             |
 |                 [ChatGPT](https://chatgpt.com/)                 |
+
+- **Reporting Period:** Week 3 (May 2026)
+
+## Activity Summary
+
+- **Effort:** ~5 hours
+- **Focus:** Focus: Creating architectural diagrams and conducting peer reviews
+
+## Tasks Performed
+
+- Created the **Context Diagram** and the **Pipeline Diagram** using the PlantUML extension in VS Code
+
+- Exported the diagrams as `.svg` files and embedded them directly into `overview.md`
+
+- Reviewed the Software Design - Dependencies work completed by Negar and Shayan
+
+- Reviewed the Software Design - Assess Pattern work completed by Felice and Paolo
+
+## Contribution to Main Report
+
+- Added Context and Pipeline diagrams to `overview.md`
+- Reviewed the teammate contributions for the Software Design sections
+
+## References & Sources Consulted
+
+- `PlantUML` VS Code Extension & `Graphviz` setup documentation
+
+- Prettier official architecture documentation
+
+- C4 Model standards (`c4model.com`)
