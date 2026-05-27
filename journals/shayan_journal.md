@@ -35,3 +35,17 @@
 * Contributed to the **Software Design Report - Section 2:Knowledge Dependencies**.
 
 ---
+
+* **Reporting Period:** Week 4 (May 2026)
+
+---
+
+## Activity Summary 3
+* **Effort:** 3 hours
+* **Activity:** Trying to learn what is the main notes about 3 diagrams (Context-Container-Component). And learn how to work with c4 modeling and how use `Graphviz` and write `PlantUML` scripts.
+
+### Tasks Performed:
+* Initial draw of Container & Component diagram
+
+
+---
