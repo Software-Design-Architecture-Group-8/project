@@ -37,3 +37,14 @@
 * Drafted the methodology and findings for **Section 2: Knowledge Dependencies** within the Software Design Report.
 
 ---
+
+## Activity Summary 3
+* **Effort:** 3 hours
+* **Activity:** Studied the core concepts of Context, Container, and Component diagrams. Practiced C4 modeling by writing `PlantUML` scripts and using `Graphviz`.
+* **Reporting Period:** Week 4 (May 2026)
+
+### Tasks Performed:
+* Drafted the Component diagram focusing strictly on the Formatting Core.
+* Analyzed the four internal components to check for SOLID compliance.
+
+---
