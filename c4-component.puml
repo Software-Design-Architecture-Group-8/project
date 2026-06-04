@@ -1,0 +1,22 @@
+@startuml prettier-component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Prettier - Components (Formatting Core)
+
+Container_Boundary(core, "Formatting Core") {
+    Component(options, "Options Resolver", "src/main", "Merges config & defaults")
+    Component(parse, "Parser Dispatcher", "src/main", "Picks the right parser")
+    Component(post, "AST Post-processor", "src/main", "Normalises the AST")
+    Component(print, "Printer Dispatcher", "src/main", "Walks AST, emits IR")
+}
+
+Container(document, "Document Module", "src/document", "Builds & prints IR")
+System_Ext(parsers, "External Parsers", "Babel, TS, PostCSS")
+
+Rel(options, parse, "Feeds options to")
+Rel(parse, parsers, "Delegates parsing to")
+Rel(parse, post, "Then")
+Rel(post, print, "Then")
+Rel(print, document, "Emits IR to")
+
+@enduml

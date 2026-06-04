@@ -1,0 +1,27 @@
+@startuml prettier-container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Prettier - Containers
+
+Person(dev, "Developer / CI", "Runs Prettier")
+System_Ext(editor, "Editor / IDE", "Formats on save")
+System_Ext(parsers, "External Parsing libraries", "Babel, TS, PostCSS")
+
+System_Boundary(prettier, "Prettier") {
+    Container(cli, "CLI", "Node.js / src/cli", "Command-line entry point")
+    Container(api, "Node.js API", "Node.js / src/index.js", "prettier.format() public API")
+    Container(core, "Formatting Core", "Node.js / src/main", "Orchestrates parse to print")
+    Container(plugins, "Language Plugins", "Node.js / src/language-*", "Formatting plugins for supported languages")
+    Container(document, "Document Module", "Node.js / src/document", "Intermediate representation")
+}
+
+Rel(dev, cli, "Runs prettier --write")
+Rel(editor, api, "Calls on save")
+Rel(cli, core, "Invokes")
+Rel(api, core, "Invokes")
+Rel(core, plugins, "Selects plugin")
+Rel(core, document, "Builds & prints IR")
+Rel(plugins, document, "Produces IR via")
+Rel(plugins, parsers, "Parses source with")
+
+@enduml

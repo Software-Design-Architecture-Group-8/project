@@ -1,0 +1,36 @@
+@startuml Prettier_System_Context_Perfect
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title System Context Diagram - Prettier Code Formatter (Strict Acyclic Hierarchy)
+
+' === TOP TIER: HUMAN ACTORS (IN CONTROL) ===
+Person(developer, "Developer / Development Team", "Writes original software features and triggers formatting commands.")
+Person(tech_lead, "Project Tech Lead", "Establishes codebase code-style rules and governance rules.")
+
+' === MIDDLE TIER: INPUT DEPENDENCIES & CORE ===
+System_Ext(prettier_config, "Configuration File (.prettierrc)", "Asset containing the explicit style rules chosen by the Tech Lead.")
+System_Ext(external_parsers, "Third-Party Parsers", "External parser libraries (Babel, PostCSS) that convert raw text into Abstract Syntax Trees.")
+System(prettier_system, "Prettier System", "The central layout printer engine. Processes structured tree nodes and calculates ideal line breaks.")
+
+' === BOTTOM TIER: OUTPUT TARGETS (RECEIVERS) ===
+System_Ext(local_files, "Local File System Storage", "Physical hard drive blocks where clean, rewritten files are saved.")
+System_Ext(cicd_pipeline, "CI/CD Pipeline Engine", "Automated remote execution runners (GitHub Actions) validating repository style compliance.")
+
+' --- DATA DIRECTION MAPPINGS (STRICTLY DOWNWARD) ---
+
+' Humans configure and trigger things downwards
+Rel(tech_lead, prettier_config, "Defines formatting rules inside")
+Rel(developer, prettier_system, "Triggers execution commands via terminal or editor hooks on")
+
+' Inputs flow down/sideways into the Prettier Engine
+Rel(prettier_config, prettier_system, "Feeds configuration parameters into")
+Rel(external_parsers, prettier_system, "Supplies read-only Abstract Syntax Trees (AST) to")
+
+' Prettier pushes outputs strictly downward to the destination systems
+Rel(prettier_system, local_files, "Saves beautifully formatted code onto", "Disk I/O")
+Rel(prettier_system, cicd_pipeline, "Sends deterministic process verification exit codes to", "OS Shell Process")
+
+@endum
