@@ -32,7 +32,7 @@ Prettier interacts with outside systems in its environment through simple, one-w
 
 - **CI/CD Pipelines** &rarr; In automated cloud environments, Prettier checks if code matches your style rules using `prettier --check`. It interacts directly with the _OS shell process_ by sending a success or failure flag (exit code) to the pipeline runner to approve or block code deployments.
 
-# 2 Container Diagram Explanation
+# 2. Container Diagram Explanation
 
 ![alt text](prettier-container.svg)
 
@@ -65,7 +65,7 @@ The overall formatting workflow can be summarized as follows:
 4. the formatting logic traverses the AST;
 5. the Document Module generates the final formatted output.
 
-### 3.3 Component Level
+# 3. Component Level
 
 ![alt text](prettier-component.svg)
 
@@ -80,7 +80,7 @@ The arrow at the bottom crosses the dashed boundary because the IR is consumed b
 
 **Discarded containers.** We zoomed only into the Formatting Core because the other containers are too thin to be worth opening: the CLI just parses arguments and calls the core, the Node API exports a single `format()` function, the Document Module is already covered in section1.4, and the eight Language Plugins all share the same internal shape so drawing one is enough — described in prose to avoid eight near-identical diagrams.
 
-### 3.4 SOLID at the Component Level
+### 3.1 SOLID at the Component Level
 
 **SRP** — mostly respected, with one weak point: the **Printer Dispatcher** both walks the AST *and* dispatches each node to a sub-printer. This is the same observation as section1.2, where the corresponding file had the highest out-degree (41 imports) in the project. Splitting traversal from dispatch would be a clean refactoring.
 
