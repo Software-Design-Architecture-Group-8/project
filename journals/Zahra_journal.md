@@ -1,9 +1,10 @@
-# Individual Journal — Zahra Ebrahimzadeh
+<div style="color: #1A2B34">
 
-- **Project:** Prettier
-- **Reporting Period:** Week 1 (May 2026)
+# <span style="color: #EA5E5B;">Individual Journal — Zahra Ebrahimzadeh</span>
 
-## Activity Summary
+**Project:** Prettier
+
+## <p style ="color:#56B3B4;">Activity Summary- <span style="font-size: 16px; ">Week 1 (May 2026)</span></p>
 
 - **Effort:** ~6.5 hours
 - **Focus:** Overview report — system understanding and documentation
@@ -42,9 +43,7 @@
 |             [AST Explorer](https://astexplorer.net)             |
 |                 [ChatGPT](https://chatgpt.com/)                 |
 
-- **Reporting Period:** Week 3 (May 2026)
-
-## Activity Summary
+## <p style ="color:#56B3B4;">Activity Summary- <span style="font-size: 16px; ">Week 3 (May 2026)</span></p>
 
 - **Effort:** ~5 hours
 - **Focus:** Focus: Creating architectural diagrams and conducting peer reviews
@@ -71,3 +70,34 @@
 - Prettier official architecture documentation
 
 - C4 Model standards (`c4model.com`)
+
+## <p style ="color:#56B3B4;">Activity Summary- <span style="font-size: 16px; ">Week 4 (May 2026)</span></p>
+
+- **Effort:** ~6 hours
+- **Focus:** Task distribution, stakeholder scope analysis, Context diagram drafting
+
+## Tasks Performed
+
+- Held a team meeting to divide upcoming project tasks and align on the overall system architecture framework.
+- Discussed the necessity of the Context Diagram within the `Overview.md` and collectively decided to omit it from the final version.
+- Deeply analyzed the importance of each project stakeholder, mapping out their individual scope and direct relationships to the system.
+- Prepared the finalized conceptual draft of the context diagram and its core content based on team feedback.
+- Edited and updated `overview.md` to ensure clarity and consistency across sections.
+
+## Contribution to Main Report
+
+- Collaborated on task assignment and architecture alignment
+- Refined stakeholder analysis sections
+- Drafted the first version of the context level section
+- Updated and edited `overview.md`
+
+## References & Sources Consulted
+
+| Websites Visited                        |
+| :-------------------------------------- |
+| [WordCounts](https://wordcounts.com/en) |
+| [Gemini / ChatGPT]                      |
+| [npm](https://www.npmjs.com)            |
+| [c4model](c4model.com)                  |
+
+</div>
