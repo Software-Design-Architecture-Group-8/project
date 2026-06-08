@@ -1,22 +1,55 @@
 @startuml prettier-component
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
-title Prettier - Components (Formatting Core)
+title Component Diagram - Prettier Formatting Core
+
+' --- External actors / containers shown for cohesion with the Container diagram ---
+
+Container(cli, "CLI", "Node.js / src/cli", "Command-line entry point that submits source text, file path and resolved options to the Formatting Core.")
+
+Container(api, "Node.js API", "Node.js / src/index.js", "Programmatic entry point that submits source text and API options to the Formatting Core.")
+
+Container(plugins, "Language Plugins", "Node.js / src/language-*", "Language-specific modules that provide parsers and printers for JavaScript, TypeScript, HTML, CSS, Markdown and other supported languages.")
+
+Container(document, "Document Module", "Node.js / src/document", "Builds and renders Prettier's intermediate document representation, including indentation, grouping and line wrapping.")
+
+System_Ext(external_parsers, "Third-Party Parsers", "External libraries such as Babel, PostCSS and TypeScript ESTree that convert raw source text into Abstract Syntax Trees.")
+
+' --- Components inside the Formatting Core container ---
 
 Container_Boundary(core, "Formatting Core") {
-    Component(options, "Options Resolver", "src/main", "Merges config & defaults")
-    Component(parse, "Parser Dispatcher", "src/main", "Picks the right parser")
-    Component(post, "AST Post-processor", "src/main", "Normalises the AST")
-    Component(print, "Printer Dispatcher", "src/main", "Walks AST, emits IR")
+
+    Component(options_resolver, "Options Resolver", "Node.js / src/main/options", "Merges user configuration (.prettierrc, CLI flags) with built-in defaults and produces the resolved option set used by every other component.")
+
+    Component(parser_dispatcher, "Parser Dispatcher", "Node.js / src/main/parse", "Selects the correct language plugin based on file extension and resolved options, and delegates parsing to it.")
+
+    Component(ast_postprocessor, "AST Post-processor", "Node.js / src/main/ast-to-doc", "Normalises the Abstract Syntax Tree so the rest of the pipeline sees a uniform shape regardless of which third-party parser produced it.")
+
+    Component(printer_dispatcher, "Printer Dispatcher", "Node.js / src/main/print", "Walks the normalised AST node by node and produces the intermediate document representation consumed by the Document Module.")
 }
 
-Container(document, "Document Module", "src/document", "Builds & prints IR")
-System_Ext(parsers, "External Parsers", "Babel, TS, PostCSS")
+' --- Inbound: how the Formatting Core is invoked ---
 
-Rel(options, parse, "Feeds options to")
-Rel(parse, parsers, "Delegates parsing to")
-Rel(parse, post, "Then")
-Rel(post, print, "Then")
-Rel(print, document, "Emits IR to")
+Rel(cli, options_resolver, "Submits source text, file path and resolved options to", "Internal method call")
+Rel(api, options_resolver, "Submits source text and API options to", "Method call: prettier.format(...)")
+
+' --- Internal pipeline inside the Formatting Core ---
+
+Rel(options_resolver, parser_dispatcher, "Provides resolved options and source text to", "Internal method call")
+Rel(parser_dispatcher, ast_postprocessor, "Forwards parsed AST to", "Internal method call")
+Rel(ast_postprocessor, printer_dispatcher, "Forwards normalised AST to", "Internal method call")
+
+' --- Outbound: how the Formatting Core talks to other containers ---
+
+Rel(parser_dispatcher, plugins, "Requests language-specific parser from", "Plugin API method call")
+Rel(plugins, external_parsers, "Requests Abstract Syntax Trees from", "Parser library calls")
+
+Rel(printer_dispatcher, plugins, "Requests language-specific printer from", "Plugin API method call")
+Rel(printer_dispatcher, document, "Creates intermediate document representation with", "Document builder method calls: group(), indent(), line()")
+
+Rel(document, printer_dispatcher, "Returns rendered formatted output to", "Internal return value")
+
+Rel(printer_dispatcher, cli, "Returns formatted text, diagnostics or exit status to", "Internal return value")
+Rel(printer_dispatcher, api, "Returns formatted string or formatting error to", "Promise / return value")
 
 @enduml

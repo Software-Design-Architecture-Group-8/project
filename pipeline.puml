@@ -1,0 +1,53 @@
+@startuml Pipeline
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+left to right direction
+
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #56B3B4
+    FontColor #333333
+    FontName Arial
+    FontSize 12
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #6C757D
+    FontColor #333333
+    FontName Arial
+    FontSize 12
+}
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #EA5E5E
+    FontColor #EA5E5E
+    FontName Arial
+    FontSize 13
+}
+
+skinparam arrow {
+    Color #333333
+    FontColor #555555
+    FontSize 11
+    FontName Arial
+}
+
+database "Raw Source File\n(Unformatted Text)" as Input #F7BA3E
+
+package "Prettier Formatting Pipeline" {
+    component "Stage 1: Parsing\n(External Language Parsers)" as Stage1 #56B3B4
+    component "Stage 2: Intermediate Representation\n(Language Printer)" as Stage2 #F7BA3E
+    component "Stage 3: Layout & Printing\n(Central Layout Engine)" as Stage3 #56B3B4
+}
+
+database "Formatted File\n(Clean Code Text)" as Output #56B3B4
+
+Input --> Stage1 : Feeds raw text\n(throws away original spaces)
+Stage1 --> Stage2 : Passes Abstract\nSyntax Tree (AST)
+Stage2 --> Stage3 : Passes instruction\nDoc Tree
+Stage3 --> Output : Saves uniform layout\n(semicolons, quotes, wrapping)
+
+@enduml

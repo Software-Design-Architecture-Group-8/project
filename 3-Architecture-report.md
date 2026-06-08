@@ -1,92 +1,91 @@
 # 1. System Context Level Analysis
 
-![alt text](Prettier_System_Context_Perfect.svg)
+![alt text](Prettier_System_Context.svg)
 
 ## 1.1 System Operational Scope and Boundaries
 
-The scope of Prettier is strictly limited to fixing and formatting the visual style of source code files. Unlike traditional code linters (such as *ESLint*), it has no access to logical bug detection or code quality metrics.
+The scope of Prettier is strictly limited to fixing and formatting the visual style of source code files. Unlike traditional code linters (such as _ESLint_), it has no access to logical bug detection or code quality metrics.
 
-### External Boundaries (*Inputs & Outputs*)
+### External Boundaries (_Inputs & Outputs_)
 
-To maintain a clean, one-way flow of data, Prettier interacts with its environment purely through specific entry and exit points:
+To maintain a clean, one-way flow of data, Prettier interacts with its environment through specific entry and exit points:
 
-- **The Input Boundary** &rarr; Prettier reads the user's chosen style rules from a local configuration file `(.prettierrc)`. It also accepts a read-only code tree map from external language parsers.
-- **The Output Boundary** &rarr; Prettier overwrites local files with clean, formatted text strings. In remote cloud tests, it passes a process status flag (*exit code*) to stop or approve code deployments.
+- **The Input Boundary** &rarr; Prettier reads raw source files directly from the local file system via _Disk I/O_. It also calls external language parsers to convert that raw source text into a readable code tree map.
+- **The Output Boundary** &rarr; Prettier writes the reformatted output back to the same location on the local file system via _Disk I/O_. In automated CI/CD environments, it returns a process status flag (exit code) to the pipeline runner that triggered it.
 
 ## 1.2 Users and Consumer Systems
 
-The system is run directly by two main human actors who interact across Prettier’s external boundary line:
+The system is run directly by one main human actor who interacts across Prettier's external boundary line:
 
-- **Developers and Feature Teams** &rarr; The primary users who supply raw code text to the system. They interact with Prettier daily through automated text-editor extensions when saving files, or by running manual terminal commands (like `prettier --write)` to format multiple folders at once.
-- **Project Tech Leads** &rarr; Manage the formatting rules without running the tool themselves. They operate at the project setup level by deciding to use Prettier for their repository. They establish the official style guidelines by creating and maintaining the central `.prettierrc` configuration file.
+- **Developers and Development Teams** &rarr; The primary users who supply raw code text to the system. They interact with Prettier daily through automated text-editor extensions when saving files (_editor hook_), or by running manual terminal commands like `prettier --write` to format multiple folders at once (_CLI_).
 
 ## 1.3 How the System Interacts with its Environment
 
-Prettier interacts with outside systems in its environment through simple, one-way inputs and outputs:
+Prettier interacts with outside systems in its environment through the following inputs and outputs:
 
-- **Configuration File** (`.prettierrc`) &rarr; Prettier reads this local file when it starts up to get your chosen style rules, like tab _widths or quote types_.
+- **External Parsers** (Babel, PostCSS, TypeScript ESTree) &rarr; Prettier calls these outside libraries to convert raw source text into a readable code _tree map (AST)_ so the engine can understand its structure.
 
-- **External Parsers** (Babel, PostCSS, TypeScript ESTree) &rarr; Prettier relies on these outside libraries to turn raw code text into a readable code _tree map (AST)_ so the engine can understand its structure.
+- **Local File System** &rarr; Prettier has a two-way interaction with the developer's disk via _Disk I/O_. It first reads the raw source files from their location, then writes the clean, reformatted output back to that same location when running `prettier --write`.
 
-- **Local File System** &rarr; When you run a format command (like `prettier --write`), the system saves the clean, rewritten code text directly back to your hard drive.
+- **CI/CD Pipelines** &rarr; In automated CI/CD environments, the pipeline triggers Prettier by running `prettier --check` to validate code style compliance. Prettier responds by returning a success or failure flag (exit code) through the _CLI / OS Shell Process_ to approve or block code deployments.
 
-- **CI/CD Pipelines** &rarr; In automated cloud environments, Prettier checks if code matches your style rules using `prettier --check`. It interacts directly with the _OS shell process_ by sending a success or failure flag (exit code) to the pipeline runner to approve or block code deployments.
 
-# 2. Container Diagram Explanation
+# 2 Container Diagram Explanation
 
 ![alt text](prettier-container.svg)
 
-The container diagram focuses on the core formatting pipeline of Prettier, which represents the most important architectural part of the system.
+The container diagram focuses on Prettier’s core formatting pipeline and refines the external interactions already shown in the Context Diagram.
 
-The architecture was decomposed according to functional responsibilities into five main containers:
-- CLI/API Layer
-- Formatting Core
-- Language Plugins
-- Document Module
-- External Parsing Libraries
+Inside Prettier, the architecture is decomposed into five main containers: 
+- CLI, Node.js API
+- Formatting Core 
+- Language Plugins 
+- Document Module. 
+The diagram also shows the external systems involved in the same workflow: Developers and Feature Teams, CI/CD Pipelines, Third-Party Parsers, and the Local File System.
 
-The CLI and API containers represent the external access points of the system. The CLI allows developers to format code directly from the terminal, while the API exposes programmatic access through functions such as `prettier.format()`.
+The CLI and Node.js API are the two entry points of the system. The CLI receives terminal commands such as `prettier --write` or `prettier --check`, while the Node.js API exposes programmatic access through calls such as `prettier.format()`. Both entry points forward source text, file paths, and resolved options to the Formatting Core.
 
-The Formatting Core acts as the central orchestrator of the formatting workflow. Its responsibilities include:
-- selecting the appropriate parser and printer;
-- coordinating plugin execution;
-- managing the formatting pipeline.
+The Formatting Core acts as the central orchestrator of the workflow. It resolves options, selects the appropriate language plugin, invokes the configured parser and printer, and coordinates formatted output generation. It does not embed language-specific formatting rules directly.
 
-Language-specific logic is isolated inside the Language Plugins container. Each plugin provides parsers and printers dedicated to a specific language such as JavaScript, TypeScript, HTML, CSS, or Markdown. This separation improves modularity and extensibility because support for new languages can be added without modifying the core logic of the system.
+Language-specific behavior is isolated inside the Language Plugins container. Each plugin provides parsers and printers for languages such as JavaScript, TypeScript, HTML, CSS, and Markdown. Plugins invoke External Parsers, such as Babel, TypeScript ESTree, and PostCSS, through parser library calls to transform raw source text into an Abstract Syntax Tree (AST).
 
-The plugins rely on third-party parsing libraries such as Babel and TypeScript ESTree to generate Abstract Syntax Trees (ASTs). These ASTs are then traversed and processed by the formatting logic.
+The Document Module builds and renders Prettier’s intermediate document representation. This representation models indentation, grouping, line wrapping, and layout decisions before being rendered into final formatted text.
 
-The Document Module is responsible for generating the intermediate document representation used internally by Prettier before rendering the final formatted output. This module manages indentation, line wrapping, grouping, and layout decisions.
+The Local File System is used by the CLI through disk I/O: source files are read as input and, in write mode, formatted text is written back to disk. In CI/CD environments, the pipeline invokes the CLI through an OS shell process, typically using `prettier --check`, and receives an exit code indicating whether the formatting check passed or failed.
 
-The overall formatting workflow can be summarized as follows:
-1. a formatting request is received through the CLI or API;
-2. the Formatting Core selects the appropriate plugin;
-3. the plugin generates an AST using external parsing libraries;
-4. the formatting logic traverses the AST;
-5. the Document Module generates the final formatted output.
+The overall workflow is:
+1. a formatting request arrives through the CLI or Node.js API;
+2. the Formatting Core receives source text, file paths, and resolved options;
+3. the Core selects and invokes the appropriate Language Plugin;
+4. the plugin uses External Parsers to generate an AST;
+5. the plugin builds a document representation through the Document Module;
+6. the Document Module renders formatted text;
+7. the Core returns formatted text, diagnostics, or an exit status to the entry point.
 
-# 3. Component Level
+This decomposition keeps the architecture modular and extensible: the Core coordinates the process, plugins isolate language-specific behavior, and the Document Module centralizes layout decisions.
+
+# 3 Component
 
 ![alt text](prettier-component.svg)
 
-The diagram zooms into the **Formatting Core** container from Level 2. It contains four components plus two boxes outside the dashed boundary that the core talks to.
+For Level 3 we zoomed into the **Formatting Core**, since it is the container that actually drives the pipeline. The other containers around it (CLI, Node.js API, Language Plugins, Document Module, Third-Party Parsers) appear on the diagram as flat boxes only — we did not open them — because the Formatting Core's components send method calls to them, and the reader needs to see what crosses the dashed boundary.
 
-- **Options Resolver** — merges the user's config (`.prettierrc`, CLI flags) with the defaults. Runs first because everything else needs these options.
-- **Parser Dispatcher** — picks the right external parser based on the file type and delegates parsing to it, producing an AST.
-- **AST Post-processor** — normalises the AST so the rest of Prettier sees a uniform shape regardless of which parser produced it.
-- **Printer Dispatcher** — walks the AST and produces the intermediate representation (IR) consumed by the Document Module.
+Inside the Formatting Core we identified four components:
 
-The arrow at the bottom crosses the dashed boundary because the IR is consumed by a different container.
+- **Options Resolver** — merges the user's config (`.prettierrc`, CLI flags) with Prettier's defaults. It runs first because every other component needs the resolved options.
+- **Parser Dispatcher** — picks the right Language Plugin based on file type and forwards parsing to it. The plugin in turn calls the third-party parsers (Babel, TypeScript, PostCSS) and returns an AST.
+- **AST Post-processor** — normalises the AST so the rest of the pipeline sees a uniform shape regardless of which parser produced it.
+- **Printer Dispatcher** — walks the normalised AST and asks the Document Module to build the intermediate document representation (`group()`, `indent()`, `line()` calls), then returns the final formatted text back to the CLI or API.
 
-**Discarded containers.** We zoomed only into the Formatting Core because the other containers are too thin to be worth opening: the CLI just parses arguments and calls the core, the Node API exports a single `format()` function, the Document Module is already covered in section1.4, and the eight Language Plugins all share the same internal shape so drawing one is enough — described in prose to avoid eight near-identical diagrams.
+**Discarded containers.** We chose to zoom only into the Formatting Core because the other containers are too thin or too repetitive to be worth opening: the CLI just parses arguments and calls the core, the Node.js API exports a single `format()` function, the Document Module is essentially a set of small builders already covered in section1.4, and the eight Language Plugins all share the same internal shape so drawing one would be representative but drawing all of them would clutter the report.
 
 ### 3.1 SOLID at the Component Level
 
-**SRP** — mostly respected, with one weak point: the **Printer Dispatcher** both walks the AST *and* dispatches each node to a sub-printer. This is the same observation as section1.2, where the corresponding file had the highest out-degree (41 imports) in the project. Splitting traversal from dispatch would be a clean refactoring.
+**SRP** — mostly respected, with one weak point: the **Printer Dispatcher** both walks the AST *and* dispatches each node to the right sub-printer. This is the same observation as section1.2, where the corresponding file had the highest out-degree (41 imports) in the project. Splitting traversal from dispatch would be a clean refactoring.
 
-**OCP** — well respected by the Parser Dispatcher: adding a new parser (like the recent `oxc`) only requires a new entry in the dispatch table.
+**OCP** — well respected by the Parser Dispatcher: adding a new parser (like the recent `oxc` parser) only requires a new entry in the dispatch table, with no changes to existing code.
 
-**DIP** — partly respected. The core depends on parsers through adapters, but our knowledge-dependency analysis (section2.3) showed the five parser adapters co-change without importing each other, meaning the shared contract is implicit. Making it an explicit interface would make the inversion real.
+**DIP** — partly respected. The core depends on parsers through adapters, but our knowledge-dependency analysis (section2.3) showed that the five parser adapters co-change without importing each other, meaning the shared contract is implicit. Making it an explicit interface would make the inversion real.
 
 **LSP and ISP** — no violations worth reporting; the interfaces between components (options, AST, IR) are narrow and focused.
 

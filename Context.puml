@@ -1,36 +1,22 @@
-@startuml Prettier_System_Context_Perfect
+@startuml Prettier_System_Context
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
 LAYOUT_TOP_DOWN()
 LAYOUT_WITH_LEGEND()
 
-title System Context Diagram - Prettier Code Formatter (Strict Acyclic Hierarchy)
+title System Context Diagram - Prettier Code Formatter
 
-' === TOP TIER: HUMAN ACTORS (IN CONTROL) ===
-Person(developer, "Developer / Development Team", "Writes original software features and triggers formatting commands.")
-Person(tech_lead, "Project Tech Lead", "Establishes codebase code-style rules and governance rules.")
+Person(developer, "Developer / Development Team", "Writes source code and triggers formatting via terminal commands (prettier --write) or automated editor extensions on file save.")
 
-' === MIDDLE TIER: INPUT DEPENDENCIES & CORE ===
-System_Ext(prettier_config, "Configuration File (.prettierrc)", "Asset containing the explicit style rules chosen by the Tech Lead.")
-System_Ext(external_parsers, "Third-Party Parsers", "External parser libraries (Babel, PostCSS) that convert raw text into Abstract Syntax Trees.")
-System(prettier_system, "Prettier System", "The central layout printer engine. Processes structured tree nodes and calculates ideal line breaks.")
+System(prettier_system, "Prettier", "An opinionated code formatter. Accepts raw source files, enforces a consistent visual style, and rewrites them according to configured rules.")
 
-' === BOTTOM TIER: OUTPUT TARGETS (RECEIVERS) ===
-System_Ext(local_files, "Local File System Storage", "Physical hard drive blocks where clean, rewritten files are saved.")
-System_Ext(cicd_pipeline, "CI/CD Pipeline Engine", "Automated remote execution runners (GitHub Actions) validating repository style compliance.")
+System_Ext(external_parsers, "Third-Party Parsers", "External libraries (Babel, PostCSS, TypeScript ESTree) that Prettier calls to convert raw source text into Abstract Syntax Trees.")
+System_Ext(local_files, "Local File System", "The developer's disk. Prettier reads raw source files from here and writes the reformatted output back to the same location.")
+System_Ext(cicd_pipeline, "CI/CD Pipeline", "Automated runners (e.g. GitHub Actions) that execute prettier --check and use the returned exit code to approve or block deployments.")
 
-' --- DATA DIRECTION MAPPINGS (STRICTLY DOWNWARD) ---
+Rel(developer, prettier_system, "Triggers formatting on", "CLI / editor hook")
+Rel(cicd_pipeline, prettier_system, "Triggers format check and receives exit code from", "CLI / OS Shell Process")
+Rel(prettier_system, external_parsers, "Requests Abstract Syntax Trees from")
+Rel(prettier_system, local_files, "Reads source files from and writes formatted output to", "Disk I/O")
 
-' Humans configure and trigger things downwards
-Rel(tech_lead, prettier_config, "Defines formatting rules inside")
-Rel(developer, prettier_system, "Triggers execution commands via terminal or editor hooks on")
-
-' Inputs flow down/sideways into the Prettier Engine
-Rel(prettier_config, prettier_system, "Feeds configuration parameters into")
-Rel(external_parsers, prettier_system, "Supplies read-only Abstract Syntax Trees (AST) to")
-
-' Prettier pushes outputs strictly downward to the destination systems
-Rel(prettier_system, local_files, "Saves beautifully formatted code onto", "Disk I/O")
-Rel(prettier_system, cicd_pipeline, "Sends deterministic process verification exit codes to", "OS Shell Process")
-
-@endum
+@enduml

@@ -1,27 +1,48 @@
 @startuml prettier-container
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-title Prettier - Containers
+title Container Diagram - Prettier Code Formatter
 
-Person(dev, "Developer / CI", "Runs Prettier")
-System_Ext(editor, "Editor / IDE", "Formats on save")
-System_Ext(parsers, "External Parsing libraries", "Babel, TS, PostCSS")
+Person(developer, "Developer / Development Team", "Writes source code and triggers formatting through the CLI or editor hooks.")
 
-System_Boundary(prettier, "Prettier") {
-    Container(cli, "CLI", "Node.js / src/cli", "Command-line entry point")
-    Container(api, "Node.js API", "Node.js / src/index.js", "prettier.format() public API")
-    Container(core, "Formatting Core", "Node.js / src/main", "Orchestrates parse to print")
-    Container(plugins, "Language Plugins", "Node.js / src/language-*", "Formatting plugins for supported languages")
-    Container(document, "Document Module", "Node.js / src/document", "Intermediate representation")
+System_Ext(cicd_pipeline, "CI/CD Pipeline", "Automated runner that executes Prettier checks and uses the returned exit code to approve or block deployments.")
+
+System_Ext(external_parsers, "Third-Party Parsers", "External libraries such as Babel, PostCSS and TypeScript ESTree that convert raw source text into Abstract Syntax Trees.")
+
+System_Ext(local_files, "Local File System", "Developer disk where Prettier reads raw source files and writes formatted output.")
+
+System_Boundary(prettier_system, "Prettier") {
+
+    Container(cli, "CLI", "Node.js / src/cli", "Command-line entry point that receives formatting/checking commands, reads files and forwards requests to the Formatting Core.")
+
+    Container(api, "Node.js API", "Node.js / src/index.js", "Programmatic entry point exposing functions such as prettier.format() for integrations and automated editor hooks.")
+
+    Container(core, "Formatting Core", "Node.js / src/main", "Central orchestrator that resolves options, selects plugins, invokes parsers/printers and coordinates formatted output generation.")
+
+    Container(plugins, "Language Plugins", "Node.js / src/language-*", "Language-specific modules that provide parsers and printers for JavaScript, TypeScript, HTML, CSS, Markdown and other supported languages.")
+
+    Container(document, "Document Module", "Node.js / src/document", "Builds and renders Prettier's intermediate document representation, including indentation, grouping and line wrapping.")
 }
 
-Rel(dev, cli, "Runs prettier --write")
-Rel(editor, api, "Calls on save")
-Rel(cli, core, "Invokes")
-Rel(api, core, "Invokes")
-Rel(core, plugins, "Selects plugin")
-Rel(core, document, "Builds & prints IR")
-Rel(plugins, document, "Produces IR via")
-Rel(plugins, parsers, "Parses source with")
+Rel(developer, cli, "Triggers formatting on", "CLI command: prettier --write")
+Rel(developer, api, "Triggers formatting on", "Editor hook / API call: prettier.format()")
+
+Rel(cicd_pipeline, cli, "Triggers format check and receives exit code from", "CLI / OS Shell Process: prettier --check")
+
+Rel(cli, local_files, "Reads source files from and writes formatted output to", "Disk I/O")
+Rel(cli, core, "Submits source text, file path and resolved options to", "Internal method calls")
+
+Rel(api, core, "Submits source text and API options to", "Method call: prettier.format(...)")
+
+Rel(core, plugins, "Selects configured parser/printer and invokes language-specific formatting through", "Plugin API method calls")
+
+Rel(plugins, external_parsers, "Requests Abstract Syntax Trees from", "Parser library calls")
+
+Rel(plugins, document, "Creates intermediate document representation with", "Document builder method calls: group(), indent(), line()")
+
+Rel(document, core, "Returns rendered formatted output to", "Internal return value")
+
+Rel(core, cli, "Returns formatted text, diagnostics or exit status to", "Internal return value")
+Rel(core, api, "Returns formatted string or formatting error to", "Promise / return value")
 
 @enduml
