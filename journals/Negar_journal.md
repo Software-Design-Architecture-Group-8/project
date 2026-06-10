@@ -48,3 +48,17 @@
 * Analyzed the four internal components to check for SOLID compliance.
 
 ---
+
+---
+
+## Activity Summary 4
+* **Effort:** 4 hours
+* **Activity:** Working on modifying the component level diagram with **Shayan**.
+* **Reporting Period:** Week 5 (June 2026)
+
+### Tasks Performed:
+* Modify the digarm after the professor's feedback 
+* Update and edit the discriptions 
+
+
+---
