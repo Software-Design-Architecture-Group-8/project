@@ -49,3 +49,17 @@
 
 
 ---
+
+* **Reporting Period:** Week 5 (May-June 2026)
+
+---
+
+## Activity Summary 4
+* **Effort:** 4 hours
+* **Activity:** Working modified version (after professor feedback) of component level diagram with **Negar**. Also managing unifing the team works in repository. 
+
+### Tasks Performed:
+* Modifying draw of Component diagram and managing the fina repository structure
+
+
+---

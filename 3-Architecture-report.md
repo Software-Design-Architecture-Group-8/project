@@ -90,3 +90,61 @@ Inside the Formatting Core we identified four components:
 **LSP and ISP** — no violations worth reporting; the interfaces between components (options, AST, IR) are narrow and focused.
 
 Overall, the component design is clean. The main finding is consistent with the rest of the report: the dispatchers do slightly too much, and the parser contract should be made explicit.
+
+
+# 4. Architectural Characteristics and Quality Attributes
+
+The architectural design of Prettier is heavily optimized to support a specific set of non-functional requirements. Because Prettier operates as a critical tool in daily developer workflows (often running on every file save), its architecture prioritizes  **Extensibility** ,  **Performance** , and **Reliability** over configuration flexibility.
+
+## 4.1 Key Quality Attributes
+
+### Extensibility & Modularity
+
+As highlighted in the Container and Component levels, Prettier achieves high extensibility through its **Language Plugins** architecture.
+
+* By decoupling the **Formatting Core** from language-specific logic, adding support for a new language or transitioning to a faster parser (such as the `oxc` parser) does not require modifying the central orchestration pipeline.
+* This isolation prevents regression bugs in established language formatters (like JavaScript) when new languages are introduced.
+
+### Performance and Low Latency
+
+Prettier is frequently executed via *editor hooks* during file saves, meaning its execution time must remain imperceptible to the human eye (ideally under 100-200 milliseconds per file).
+
+* The system supports this by adopting a strict, linear pipeline:  **Parse → AST Post-process → Print (IR generation) → Render** .
+* There are no complex, iterative optimization loops or deep AST-mutation cycles. By delegating heavy parsing to highly optimized external libraries, Prettier preserves its CPU cycles entirely for intermediate representation (IR) layout decisions.
+
+### Reliability and Correctness (Invariance)
+
+The most critical architectural requirement of an automated formatter is that it  **must never alter code behavior** . Prettier enforces this through an architectural safety guardrail during execution:
+
+1. It parses the initial source text into an initial AST.
+2. It generates the formatted string output.
+3. It parses the formatted output back into a secondary AST.
+4. It compares both ASTs (ignoring structural layout changes like whitespace and comments). If any logical variance is detected, the operation automatically faults and aborts, ensuring zero code corruption.
+
+## 4.2 Metrics-Driven Analysis: Coupling and Cohesion
+
+To evaluate the structural health of the architecture, we can look at the system through the lens of component coupling (FanIn/FanOut) and cohesion metrics.
+
+### Instability Metric (**$I$**) and Coupling Trade-offs
+
+Component instability can be mathematically defined using (**$FanIn$**, incoming dependencies) and (**$FanOut$**, outgoing dependencies):
+
+$$
+I = \frac{FanOut}{FanIn + FanOut}
+$$
+
+* **The Printer Dispatcher (**$I \to 1$**):** As noted in the SOLID analysis (Section 3.1), the Printer Dispatcher exhibits an exceptionally high out-degree (high **$FanOut$**), making it highly unstable according to this metric. It depends heavily on the Document Module and various sub-printers.
+* **The Architectural Trade-off:** While a high instability index is typically an anti-pattern, here it serves as a  **bussing component** . By concentrating the efferent coupling into a single dispatcher component, Prettier allows individual language printers to remain entirely decoupled from each other.
+
+### High Cohesion via Single Responsibility
+
+Prettier scores remarkably well on cohesion, particularly when evaluating the **Lack of Cohesion in Methods (LCOM)** across its sub-components.
+
+| **Component** | **Cohesion Type** | **Architectural Impact** |
+| -------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Options Resolver** | Functional | Single responsibility: ensures configuration states are completely immutable before formatting begins. |
+| **Language Plugins** | Informational / Clustered | Encapsulates only the parser adapters and printer configurations for its specific domain. |
+| **Document Module** | Sequential | Highly cohesive builders (`group`,`indent`) that act as a pure layout engine, completely unaware of language semantics. |
+
+> **Conclusion:** Prettier’s structural metrics reveal a deliberate and pragmatic design. It accepts high FanOut coupling at its central dispatching nodes in order to secure maximum functional cohesion and independence for its language-specific extensions. This mathematical balance is what allows the codebase to remain stable despite supporting a fast-growing matrix of web languages.
+>
